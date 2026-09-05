@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retail Sales & Inventory Copilot</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f5f7fb;
+            color: #1f2937;
+        }
+
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background: #111827;
+            color: white;
+            padding: 25px 18px;
+        }
+
+        .logo {
+            font-size: 21px;
+            font-weight: bold;
+            margin-bottom: 35px;
+        }
+
+        .logo span {
+            color: #60a5fa;
+        }
+
+        .menu-item {
+            padding: 13px 15px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #d1d5db;
+        }
+
+        .menu-item:hover,
+        .menu-item.active {
+            background: #1f2937;
+            color: white;
+        }
+
+        /* Main */
+        .main {
+            flex: 1;
+            padding: 30px;
+            overflow-x: hidden;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+        }
+
+        .header p {
+            color: #6b7280;
+            margin-top: 5px;
+        }
+
+        .refresh-btn {
+            border: none;
+            background: #2563eb;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .refresh-btn:hover {
+            background: #1d4ed8;
+        }
+
+        /* Cards */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .card-title {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .card-value {
+            font-size: 27px;
+            font-weight: bold;
+        }
+
+        /* Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .panel {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .panel h2 {
+            font-size: 19px;
+            margin-bottom: 18px;
+        }
+
+        /* Table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 13px 10px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+
+        th {
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .critical {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .reorder {
+            background: #ffedd5;
+            color: #c2410c;
+        }
+
+        .risk {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .overstock {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        /* Top selling */
+        .product-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 13px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .product-name {
+            font-weight: 600;
+        }
+
+        .units {
+            color: #2563eb;
+            font-weight: bold;
+        }
+
+        /* Copilot */
+        .copilot {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .copilot h2 {
+            margin-bottom: 5px;
+        }
+
+        .copilot-subtitle {
+            color: #6b7280;
+            margin-bottom: 20px;
+        }
+
+        .chat-box {
+            min-height: 130px;
+            max-height: 420px;
+            overflow-y: auto;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+        }
+
+        .user-message {
+            text-align: right;
+        }
+
+        .message-bubble {
+            display: inline-block;
+            padding: 11px 15px;
+            border-radius: 10px;
+            max-width: 80%;
+            line-height: 1.5;
+        }
+
+        .user-message .message-bubble {
+            background: #2563eb;
+            color: white;
+        }
+
+        .bot-message .message-bubble {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .recommendation {
+            margin-top: 10px;
+            background: #eff6ff;
+            border-left: 4px solid #2563eb;
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        .evidence {
+            margin-top: 10px;
+            background: #111827;
+            color: #d1d5db;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 13px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .chat-input:focus {
+            border-color: #2563eb;
+        }
+
+        .send-btn {
+            border: none;
+            background: #2563eb;
+            color: white;
+            padding: 0 22px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .send-btn:hover {
+            background: #1d4ed8;
+        }
+
+        /* Suggestions */
+        .suggestions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .suggestion {
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .suggestion:hover {
+            background: #e5e7eb;
+        }
+
+        .loading {
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        .empty {
+            text-align: center;
+            color: #9ca3af;
+            padding: 20px;
+        }
+
+        @media (max-width: 1000px) {
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main {
+                padding: 15px;
+            }
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            Nexus<span>Tiq24</span>
+        </div>
+
+        <div class="menu-item active">
+            📊 Dashboard
+        </div>
+
+        <div class="menu-item">
+            📦 Inventory
+        </div>
+
+        <div class="menu-item">
+            🛒 Sales
+        </div>
+
+        <div class="menu-item">
+            🤖 Copilot
+        </div>
+    </aside>
+
+
+    <!-- Main -->
+    <main class="main">
+
+        <div class="header">
+            <div>
+                <h1>Retail Sales & Inventory Copilot</h1>
+                <p>Monitor sales, stock levels and inventory risks.</p>
+            </div>
+
+            <button class="refresh-btn" onclick="loadDashboard()">
+                🔄 Refresh
+            </button>
+        </div>
+
+
+        <!-- Summary Cards -->
+        <section class="cards">
+
+            <div class="card">
+                <div class="card-title">Total Revenue</div>
+                <div class="card-value" id="totalRevenue">₹0</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Units Sold</div>
+                <div class="card-value" id="unitsSold">0</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Products</div>
+                <div class="card-value" id="productCount">0</div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Low Stock</div>
+                <div class="card-value" id="lowStock">0</div>
+            </div>
+
+        </section>
+
+
+        <!-- Dashboard -->
+        <section class="dashboard-grid">
+
+            <!-- Inventory Alerts -->
+            <div class="panel">
+
+                <h2>📦 Inventory Alerts</h2>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Store</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="inventoryTable">
+                        <tr>
+                            <td colspan="4" class="empty">
+                                Loading...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+
+
+            <!-- Top Selling -->
+            <div class="panel">
+
+                <h2>🔥 Top Selling</h2>
+
+                <div id="topSelling">
+                    <div class="empty">
+                        Loading...
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Copilot -->
+        <section class="copilot">
+
+            <h2>🤖 Inventory Copilot</h2>
+
+            <p class="copilot-subtitle">
+                Ask questions about your sales and inventory data.
+            </p>
+
+
+            <!-- Suggestions -->
+            <div class="suggestions">
+
+                <button class="suggestion"
+                    onclick="askQuestion('Which products are running out?')">
+                    Which products are running out?
+                </button>
+
+                <button class="suggestion"
+                    onclick="askQuestion('What are the best selling products?')">
+                    What are the best selling products?
+                </button>
+
+                <button class="suggestion"
+                    onclick="askQuestion('What is the total revenue?')">
+                    What is the total revenue?
+                </button>
+
+                <button class="suggestion"
+                    onclick="askQuestion('Which products are overstocked?')">
+                    Which products are overstocked?
+                </button>
+
+                <button class="suggestion"
+                    onclick="askQuestion('daily inventory alerts')">
+                    Daily inventory alerts
+                </button>
+
+            </div>
+
+
+            <!-- Chat -->
+            <div class="chat-box" id="chatBox">
+
+                <div class="message bot-message">
+
+                    <div class="message-bubble">
+                        👋 Hello! I am your Retail Inventory Copilot.
+                        Ask me about sales, stock, overstock or inventory alerts.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Input -->
+            <div class="chat-input-area">
+
+                <input
+                    type="text"
+                    id="chatInput"
+                    class="chat-input"
+                    placeholder="Ask something like: Which products are running out?"
+                    onkeydown="handleEnter(event)"
+                >
+
+                <button
+                    class="send-btn"
+                    onclick="sendMessage()">
+                    Send
+                </button>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<script>
+
+    // -----------------------------
+    // Utility
+    // -----------------------------
+
+    function escapeHtml(value) {
+
+        if (value === null || value === undefined) {
+            return "";
+        }
+
+        return String(value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
+
+    function formatNumber(value) {
+
+        return Number(value || 0).toLocaleString("en-IN");
+    }
+
+
+    function formatCurrency(value) {
+
+        return "₹" + Number(value || 0).toLocaleString("en-IN");
+    }
+
+
+    function getStatusClass(status) {
+
+        const value = String(status || "").toUpperCase();
+
+        if (value.includes("CRITICAL")) {
+            return "critical";
+        }
+
+        if (value.includes("REORDER")) {
+            return "reorder";
+        }
+
+        if (value.includes("STOCK-OUT")) {
+            return "risk";
+        }
+
+        if (value.includes("OVERSTOCK")) {
+            return "overstock";
+        }
+
+        return "";
+    }
+
+
+    // -----------------------------
+    // Load Dashboard
+    // -----------------------------
+
+    async function loadDashboard() {
+
+        try {
+
+            const response = await fetch("/api/summary?time=this_month");
+
+            if (!response.ok) {
+                throw new Error("Failed to load dashboard");
+            }
+
+            const data = await response.json();
+
+
+            // Summary cards
+            document.getElementById("totalRevenue").textContent =
+                formatCurrency(data.total_revenue);
+
+            document.getElementById("unitsSold").textContent =
+                formatNumber(data.units_sold);
+
+            document.getElementById("productCount").textContent =
+                formatNumber(data.product_count);
+
+            document.getElementById("lowStock").textContent =
+                formatNumber(data.low_stock_count);
+
+
+            // Inventory Alerts
+            const inventoryTable =
+                document.getElementById("inventoryTable");
+
+            const alerts = data.inventory_alerts || [];
+
+
+            if (alerts.length === 0) {
+
+                inventoryTable.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="empty">
+                            No inventory alerts 🎉
+                        </td>
+                    </tr>
+                `;
+
+            } else {
+
+                inventoryTable.innerHTML = alerts.map(alert => {
+
+                    const status = escapeHtml(alert.status);
+
+                    return `
+                        <tr>
+
+                            <td>
+                                <strong>
+                                    ${escapeHtml(alert.product)}
+                                </strong>
+                            </td>
+
+                            <td>
+                                ${escapeHtml(alert.store)}
+                            </td>
+
+                            <td>
+                                ${escapeHtml(alert.stock)}
+                            </td>
+
+                            <td>
+                                <span class="status ${getStatusClass(alert.status)}">
+                                    ${status}
+                                </span>
+                            </td>
+
+                        </tr>
+                    `;
+
+                }).join("");
+
+            }
+
+
+            // Top Selling
+            const topSelling =
+                document.getElementById("topSelling");
+
+            const products = data.top_selling || [];
+
+
+            if (products.length === 0) {
+
+                topSelling.innerHTML = `
+                    <div class="empty">
+                        No sales data available.
+                    </div>
+                `;
+
+            } else {
+
+                topSelling.innerHTML = products.map(product => {
+
+                    return `
+                        <div class="product-row">
+
+                            <div>
+                                <div class="product-name">
+                                    ${escapeHtml(product.product)}
+                                </div>
+                            </div>
+
+                            <div class="units">
+                                ${formatNumber(product.units)} units
+                            </div>
+
+                        </div>
+                    `;
+
+                }).join("");
+
+            }
+
+        } catch (error) {
+
+            console.error(error);
+
+            document.getElementById("inventoryTable").innerHTML = `
+                <tr>
+                    <td colspan="4" class="empty">
+                        Unable to load inventory data.
+                    </td>
+                </tr>
+            `;
+
+            document.getElementById("topSelling").innerHTML = `
+                <div class="empty">
+                    Unable to load sales data.
+                </div>
+            `;
+        }
+    }
+
+
+    // -----------------------------
+    // Ask Question
+    // -----------------------------
+
+    function askQuestion(question) {
+
+        document.getElementById("chatInput").value = question;
+
+        sendMessage();
+    }
+
+
+    // -----------------------------
+    // Send Message
+    // -----------------------------
+
+    async function sendMessage() {
+
+        const input =
+            document.getElementById("chatInput");
+
+        const question =
+            input.value.trim();
+
+
+        if (!question) {
+            return;
+        }
+
+
+        const chatBox =
+            document.getElementById("chatBox");
+
+
+        // User message
+        chatBox.innerHTML += `
+            <div class="message user-message">
+
+                <div class="message-bubble">
+                    ${escapeHtml(question)}
+                </div>
+
+            </div>
+        `;
+
+
+        input.value = "";
+
+
+        // Loading
+        chatBox.innerHTML += `
+            <div class="message bot-message" id="loadingMessage">
+
+                <div class="message-bubble loading">
+                    Thinking...
+                </div>
+
+            </div>
+        `;
+
+
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+
+        try {
+
+            const response = await fetch("/api/chat", {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    question: question
+                })
+
+            });
+
+
+            if (!response.ok) {
+                throw new Error("Chat request failed");
+            }
+
+
+            const data = await response.json();
+
+
+            // Remove loading
+            const loading =
+                document.getElementById("loadingMessage");
+
+            if (loading) {
+                loading.remove();
+            }
+
+
+            let html = `
+                <div class="message bot-message">
+
+                    <div class="message-bubble">
+                        ${escapeHtml(data.answer || "No answer available.")}
+                    </div>
+            `;
+
+
+            // Recommendation
+            if (data.recommendation) {
+
+                html += `
+                    <div class="recommendation">
+
+                        <strong>💡 Recommended Action</strong>
+
+                        <br><br>
+
+                        ${escapeHtml(data.recommendation)}
+
+                    </div>
+                `;
+            }
+
+
+            // Evidence
+            if (data.evidence) {
+
+                html += `
+                    <div class="evidence">
+                        <strong>📊 Evidence</strong>
+
+                        ${escapeHtml(
+                            JSON.stringify(data.evidence, null, 2)
+                        )}
+                    </div>
+                `;
+            }
+
+
+            html += `
+                </div>
+            `;
+
+
+            chatBox.innerHTML += html;
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+
+        } catch (error) {
+
+            console.error(error);
+
+
+            const loading =
+                document.getElementById("loadingMessage");
+
+            if (loading) {
+                loading.remove();
+            }
+
+
+            chatBox.innerHTML += `
+                <div class="message bot-message">
+
+                    <div class="message-bubble">
+                        ❌ Sorry, I could not process the request.
+                        Please try again.
+                    </div>
+
+                </div>
+            `;
+
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+    }
+
+
+    // -----------------------------
+    // Enter Key
+    // -----------------------------
+
+    function handleEnter(event) {
+
+        if (event.key === "Enter") {
+            sendMessage();
+        }
+
+    }
+
+
+    // -----------------------------
+    // Start Dashboard
+    // -----------------------------
+
+    loadDashboard();
+
+</script>
+
+</body>
+</html>

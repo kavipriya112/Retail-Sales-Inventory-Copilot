@@ -1,0 +1,21 @@
+Date,Product_ID,Product_Name,Store,Quantity,Revenue
+2026-09-01,P001,Rice 5kg,Store A,5,2250
+2026-09-02,P002,Shampoo,Store A,2,360
+2026-09-03,P003,Notebook,Store A,10,600
+2026-09-04,P001,Rice 5kg,Store A,4,1800
+2026-09-05,P004,Cooking Oil 1L,Store B,3,480
+2026-09-06,P005,Soap,Store B,8,360
+2026-09-07,P002,Shampoo,Store A,3,540
+2026-09-08,P006,Biscuits,Store B,5,150
+2026-09-09,P007,Tea Powder 500g,Store A,6,1320
+2026-09-10,P008,Toothpaste,Store B,4,480
+2026-09-11,P001,Rice 5kg,Store A,6,2700
+2026-09-12,P002,Shampoo,Store A,4,720
+2026-09-13,P003,Notebook,Store A,5,300
+2026-09-14,P004,Cooking Oil 1L,Store B,6,960
+2026-09-15,P005,Soap,Store B,10,450
+2026-09-16,P006,Biscuits,Store B,8,240
+2026-09-17,P007,Tea Powder 500g,Store A,4,880
+2026-09-18,P008,Toothpaste,Store B,3,360
+2026-09-19,P001,Rice 5kg,Store A,7,3150
+2026-09-20,P002,Shampoo,Store A,5,900

@@ -1,0 +1,9 @@
+Product_ID,Product_Name,Category,Store,Price,Stock
+P001,Rice 5kg,Grocery,Store A,450,20
+P002,Shampoo,Personal Care,Store A,180,5
+P003,Notebook,Stationery,Store A,60,50
+P004,Cooking Oil 1L,Grocery,Store B,160,8
+P005,Soap,Personal Care,Store B,45,35
+P006,Biscuits,Food,Store B,30,12
+P007,Tea Powder 500g,Grocery,Store A,220,25
+P008,Toothpaste,Personal Care,Store B,120,6
